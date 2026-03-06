@@ -168,7 +168,7 @@
 </head>
 <body>
     <div class="container" id="mainCard">
-        <img src="ستيكر-متحركة-سبحه.gif" alt="Happy Cat" class="cat-img">
+        <img src="ستيكر-متحركة-سبحه.gif" id="mainCat" alt="Happy Cat" class="cat-img">
             <div id="questionArea">
                 <h1>Пойдешь на ифтар 18 марта? 🌙✨</h1>
                 <div class="buttons">
@@ -189,6 +189,7 @@
     <script>
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
+        const mainCard = document.getElementById('mainCard');
         const questionArea = document.getElementById('questionArea');
         const successArea = document.getElementById('successArea');
 
@@ -206,22 +207,13 @@
         ];
 
         // Функция убегания кнопки
-        function getViewportBounds() {
-            const viewport = window.visualViewport;
-            if (viewport) {
-                return {
-                    width: viewport.width,
-                    height: viewport.height,
-                    left: 0,
-                    top: 0
-                };
-            }
-
+        function getCardBounds() {
+            const cardRect = mainCard.getBoundingClientRect();
             return {
-                width: document.documentElement.clientWidth,
-                height: document.documentElement.clientHeight,
-                left: 0,
-                top: 0
+                left: cardRect.left,
+                top: cardRect.top,
+                right: cardRect.right,
+                bottom: cardRect.bottom
             };
         }
 
@@ -229,12 +221,12 @@
             if (!noBtn.classList.contains('moving')) return;
 
             const margin = 12;
-            const bounds = getViewportBounds();
+            const bounds = getCardBounds();
             const rect = noBtn.getBoundingClientRect();
             const minX = bounds.left + margin;
             const minY = bounds.top + margin;
-            const maxX = bounds.left + Math.max(margin, bounds.width - rect.width - margin);
-            const maxY = bounds.top + Math.max(margin, bounds.height - rect.height - margin);
+            const maxX = Math.max(minX, bounds.right - rect.width - margin);
+            const maxY = Math.max(minY, bounds.bottom - rect.height - margin);
 
             const currentX = parseFloat(noBtn.style.left || minX);
             const currentY = parseFloat(noBtn.style.top || minY);
@@ -251,14 +243,14 @@
             noBtn.classList.add('moving');
 
             const margin = 12;
-            const bounds = getViewportBounds();
+            const bounds = getCardBounds();
             const buttonWidth = noBtn.offsetWidth;
             const buttonHeight = noBtn.offsetHeight;
 
             const minX = bounds.left + margin;
             const minY = bounds.top + margin;
-            const maxX = bounds.left + Math.max(margin, bounds.width - buttonWidth - margin);
-            const maxY = bounds.top + Math.max(margin, bounds.height - buttonHeight - margin);
+            const maxX = Math.max(minX, bounds.right - buttonWidth - margin);
+            const maxY = Math.max(minY, bounds.bottom - buttonHeight - margin);
 
             const yesRect = yesBtn.getBoundingClientRect();
             const safeGap = 20;
@@ -318,10 +310,10 @@
 
         // При клике на "Да"
         yesBtn.addEventListener('click', () => {
+            document.getElementById('mainCat').style.display = 'none';
             questionArea.style.display = 'none';
             successArea.style.display = 'block';
         });
     </script>
 </body>
 </html>
-
