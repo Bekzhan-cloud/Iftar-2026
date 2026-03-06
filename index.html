@@ -95,10 +95,14 @@
             color: white;
             position: relative;
             transition: none; /* Убираем transition для мгновенного перемещения */
+            max-width: min(80vw, 280px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #noBtn:hover {
-            transform: scale(1.05);
+            transform: none;
         }
 
         #noBtn.moving {
@@ -160,22 +164,12 @@
             margin-left: 8px;
         }
 
-        .tenor-gif-embed {
-            margin-bottom: 25px;
-            max-width: 250px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .tenor-gif-embed iframe {
-            border-radius: 15px;
-        }
     </style>
 </head>
 <body>
     <div class="container" id="mainCard">
+        <img src="C:\Users\torob\Downloads\ستيكر-متحركة-سبحه.gif" alt="Happy Cat" class="cat-img">
             <div id="questionArea">
-                <div class="tenor-gif-embed" data-postid="13894192943523802126" data-share-method="host" data-aspect-ratio="0.674757" data-width="100%"><a href="https://tenor.com/view/%D8%B3%D8%AA%D9%8A%D9%83%D8%B1-%D9%85%D8%AA%D8%AD%D8%B1%D9%83%D8%A9-%D8%B3%D8%A8%D8%AD%D9%87-%D8%AF%D8%B4%D8%AF%D8%A7%D8%B4%D9%87-%D9%82%D8%B7-%D9%85%D8%B3%D9%84%D9%85-muslim-cat-gif-13894192943523802126">ستيكر متحركة سبحه Sticker</a>from <a href="https://tenor.com/search/%D8%B3%D8%AA%D9%8A%D9%83%D8%B1+%D9%85%D8%AA%D8%AD%D8%B1%D9%83%D8%A9-stickers">ستيكر متحركة Stickers</a></div>
                 <h1>Пойдешь на ифтар 18 марта? 🌙✨</h1>
                 <div class="buttons">
                     <button id="yesBtn">Конечно!</button>
@@ -184,7 +178,7 @@
             </div>
 
         <div class="success-content" id="successArea">
-            <img src="https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif" alt="Happy Cat" class="cat-img">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZwcW92Mm01Z29xdmJ0c3V4amJxcTFjMWNudXJnbGV4MTgxcnJkMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VSLIjK1WyV3GbT5m9G/giphy.gif" alt="Happy Cat" class="cat-img">
             <h2>ОТЛИЧНО, БРО! 🔥</h2>
             <p>Записал тебя. 18 марта, не опаздывай, будет мощный ифтар! 🍽️</p>
             <a href="https://chat.whatsapp.com/Klj9FhCNV3x4MrOWFesqmA?mode=gi_t" class="whatsapp-btn" target="_blank">
@@ -192,7 +186,6 @@
             </a>
         </div>
     </div>
-    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
     <script>
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
@@ -200,6 +193,7 @@
         const successArea = document.getElementById('successArea');
 
         let yesScale = 1; // Начальный размер кнопки "Конечно"
+        const maxYesScale = 2.2;
 
         const phrases = [
             "Точно нет?", 
@@ -207,30 +201,120 @@
             "Мама не пустит?", 
             "А если за мой счет?", 
             "Кнопка сломалась?", 
-            "Даже не пытайся"
+            "Даже не пытайся",
+            "НУ ВСЕ ТЫ СлОМАЛ КНОПКУ"
         ];
 
         // Функция убегания кнопки
-        noBtn.addEventListener('mouseover', () => {
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-            
+        function getViewportBounds() {
+            const viewport = window.visualViewport;
+            if (viewport) {
+                return {
+                    width: viewport.width,
+                    height: viewport.height,
+                    left: 0,
+                    top: 0
+                };
+            }
+
+            return {
+                width: document.documentElement.clientWidth,
+                height: document.documentElement.clientHeight,
+                left: 0,
+                top: 0
+            };
+        }
+
+        function clampNoButtonInViewport() {
+            if (!noBtn.classList.contains('moving')) return;
+
+            const margin = 12;
+            const bounds = getViewportBounds();
+            const rect = noBtn.getBoundingClientRect();
+            const minX = bounds.left + margin;
+            const minY = bounds.top + margin;
+            const maxX = bounds.left + Math.max(margin, bounds.width - rect.width - margin);
+            const maxY = bounds.top + Math.max(margin, bounds.height - rect.height - margin);
+
+            const currentX = parseFloat(noBtn.style.left || minX);
+            const currentY = parseFloat(noBtn.style.top || minY);
+            const clampedX = Math.min(Math.max(currentX, minX), maxX);
+            const clampedY = Math.min(Math.max(currentY, minY), maxY);
+
+            noBtn.style.left = clampedX + 'px';
+            noBtn.style.top = clampedY + 'px';
+        }
+
+        function moveNoButton() {
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            noBtn.innerText = randomPhrase;
             noBtn.classList.add('moving');
+
+            const margin = 12;
+            const bounds = getViewportBounds();
+            const buttonWidth = noBtn.offsetWidth;
+            const buttonHeight = noBtn.offsetHeight;
+
+            const minX = bounds.left + margin;
+            const minY = bounds.top + margin;
+            const maxX = bounds.left + Math.max(margin, bounds.width - buttonWidth - margin);
+            const maxY = bounds.top + Math.max(margin, bounds.height - buttonHeight - margin);
+
+            const yesRect = yesBtn.getBoundingClientRect();
+            const safeGap = 20;
+            let x = minX;
+            let y = minY;
+            let foundSafeSpot = false;
+
+            for (let i = 0; i < 30; i++) {
+                const candidateX = minX + Math.random() * (maxX - minX);
+                const candidateY = minY + Math.random() * (maxY - minY);
+
+                const overlapsYes = !(
+                    candidateX + buttonWidth + safeGap < yesRect.left ||
+                    candidateX > yesRect.right + safeGap ||
+                    candidateY + buttonHeight + safeGap < yesRect.top ||
+                    candidateY > yesRect.bottom + safeGap
+                );
+
+                if (!overlapsYes) {
+                    x = candidateX;
+                    y = candidateY;
+                    foundSafeSpot = true;
+                    break;
+                }
+            }
+
+            if (!foundSafeSpot) {
+                x = minX + Math.random() * (maxX - minX);
+                y = minY + Math.random() * (maxY - minY);
+            }
+
             noBtn.style.left = x + 'px';
             noBtn.style.top = y + 'px';
 
-            // Меняем текст кнопки для прикола
-            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-            noBtn.innerText = randomPhrase;
-
-            // Увеличиваем кнопку "Конечно"
-            yesScale += 0.2;
+            yesScale = Math.min(maxYesScale, yesScale + 0.2);
             yesBtn.style.transform = `scale(${yesScale})`;
-            
-            // Увеличиваем также размер шрифта
+
             const newFontSize = 18 + (yesScale - 1) * 5;
             yesBtn.style.fontSize = newFontSize + 'px';
+        }
+
+        noBtn.addEventListener('mouseenter', moveNoButton);
+        noBtn.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            moveNoButton();
+        }, { passive: false });
+        noBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            moveNoButton();
         });
+
+        window.addEventListener('resize', clampNoButtonInViewport);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', clampNoButtonInViewport);
+            window.visualViewport.addEventListener('scroll', clampNoButtonInViewport);
+        }
 
         // При клике на "Да"
         yesBtn.addEventListener('click', () => {
